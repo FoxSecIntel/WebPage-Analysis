@@ -8,7 +8,7 @@ A practical Bash toolkit for quick webpage/URL triage in OSINT and defensive inv
 - `get-headers.sh` — fetch HTTP response headers
 - `get-securitytxt.sh` — fetch and parse `security.txt`
 - `webpage-parse.sh` — extract links/emails from webpage HTML
-- `HREF-Link-Extractor` — extract normalized href links
+- `HREF-Link-Extractor.sh` — extract normalized href links
 - `check-http-status-code.sh` — explain HTTP status codes
 - `qa_check.sh` — syntax + shellcheck validation
 
@@ -19,7 +19,9 @@ A practical Bash toolkit for quick webpage/URL triage in OSINT and defensive inv
 ./get-headers.sh https://example.com
 ./get-securitytxt.sh example.com
 ./webpage-parse.sh https://example.com
-./HREF-Link-Extractor https://example.com
+./HREF-Link-Extractor.sh https://example.com
+./HREF-Link-Extractor.sh --domain-only https://example.com
+./HREF-Link-Extractor.sh --output json --include-relative https://example.com
 ./check-http-status-code.sh 404
 ./qa_check.sh
 ```
