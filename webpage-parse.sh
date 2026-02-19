@@ -1,29 +1,20 @@
 #!/bin/bash
+set -euo pipefail
 
-# Check if website URL is provided as a command-line parameter
-if [ -z "$1" ]; then
-    echo "Please provide a website URL as a command-line parameter"
-    exit 1
-fi
+usage() {
+  echo "Usage: $0 <http(s)://url>"
+}
 
-# Get website URL from command-line option
-url=$1
+[[ $# -ge 1 ]] || { usage; exit 1; }
+url="$1"
+[[ "$url" =~ ^https?:// ]] || { echo "Error: URL must start with http:// or https://"; exit 1; }
 
-# Use curl to download the website HTML
-html=$(curl -L -s $url)
+html="$(curl -sS -L --max-time 20 "$url" || true)"
+[[ -n "$html" ]] || { echo "Unable to retrieve content from $url"; exit 1; }
 
-# Use grep to search for HTTP links
-links=$(echo $html | grep -o 'http[^"]*')
+echo "Links (domains found in absolute URLs):"
+printf '%s' "$html" | grep -Eoi 'https?://[^"'"'"'<> ]+' | sed 's/[),.;]$//' | sed -E 's#https?://([^/]+)/?.*#\1#' | sort -u
 
-# Use grep to extract domain name from links
-domains=$(echo "$links" | grep -oP '(?<=//)[^/]+' | sort | uniq)
-
-# Use grep to search for email addresses
-emails=$(echo $html | grep -o '[A-Za-z0-9._%+-]\+@[A-Za-z0-9.-]\+\.[A-Z|a-z]\{2,\}' | sort | uniq)
-
-# Print the results
-echo "Links:"
-echo "$domains"
-echo ""
+echo
 echo "Email addresses:"
-echo "$emails"
+printf '%s' "$html" | grep -Eoi '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' | sort -u

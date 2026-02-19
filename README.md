@@ -1,16 +1,31 @@
 # WebPage-Analysis
 
-Lots of information can be gathered from a webpage to help with OSINT investigations. Here are a couple of scripts to help !
+A practical Bash toolkit for quick webpage/URL triage in OSINT and defensive investigations.
 
->\# un-shorten.sh - This bash script allows you to expand short URLs created by URL shortening services such as bit.ly, tinyurl.com, or goo.gl, providing the original URL before clicking on the shortened link.<br>
+## Tools
 
->\# webpage-parse.sh - searches the webpage for links and email addresses<br>
+- `un-shorten.sh` — resolve redirects and reveal final URL
+- `get-headers.sh` — fetch HTTP response headers
+- `get-securitytxt.sh` — fetch and parse `security.txt`
+- `webpage-parse.sh` — extract links/emails from webpage HTML
+- `HREF-Link-Extractor` — extract normalized href links
+- `check-http-status-code.sh` — explain HTTP status codes
+- `qa_check.sh` — syntax + shellcheck validation
 
->\# HREF-Link-Extractor - Searches the webpage and extracts all HREF links
+## Usage
 
->\# get-headers.sh - grabs the http headers <br>
+```bash
+./un-shorten.sh https://bit.ly/example
+./get-headers.sh https://example.com
+./get-securitytxt.sh example.com
+./webpage-parse.sh https://example.com
+./HREF-Link-Extractor https://example.com
+./check-http-status-code.sh 404
+./qa_check.sh
+```
 
->\# get-securitytxt.sh - grabs the info in the security.txt files and displays it on the command line
+## Notes
 
->\# check-http-status-code.sh - Simple script that returns the description for a http status code
-
+- Scripts are read-only and intended for authorized defensive/OSINT use.
+- Network timeouts and temporary web errors are handled where possible.
+- For reproducible output in pipelines, prefer `--no-color` where supported.

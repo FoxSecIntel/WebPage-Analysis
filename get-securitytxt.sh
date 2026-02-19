@@ -1,43 +1,70 @@
 #!/bin/bash
+set -euo pipefail
 
-# Regular expression to match domain names
-regex='^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$'
+usage() {
+  cat <<'EOF'
+Usage:
+  get-securitytxt.sh <domain>
+  get-securitytxt.sh -i
 
-while getopts ":i" opt; do
-  case $opt in
-    i)
-      echo "security.txt is a file that provides contact information for security researchers who have discovered vulnerabilities on a website. The file is typically located at the root of the domain or at .well-known/security.txt. It is a standard proposed by the Internet Bug Bounty organization, which aims to make it easier for researchers to report vulnerabilities and for website owners to receive and respond to reports. Please see https://securitytxt.org/ for details of the specification of this file"
-      exit 0
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-      ;;
-  esac
-done
+Options:
+  -i  Explain what security.txt is
+EOF
+}
 
-# Check if a valid domain name is passed as an argument
-if [[ $1 =~ $regex ]]; then
-    domain=$1
+if [[ "${1:-}" == "-i" ]]; then
+  echo "security.txt provides vulnerability disclosure contact/policy information. See https://securitytxt.org/"
+  exit 0
+fi
+
+[[ $# -ge 1 ]] || { usage; exit 1; }
+domain="$1"
+
+if [[ ! "$domain" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]; then
+  echo "Invalid domain name"
+  exit 1
+fi
+
+fetch() {
+  local u="$1"
+  curl -sS -L --max-time 15 "$u" || true
+}
+
+root_url="https://${domain}/security.txt"
+wk_url="https://${domain}/.well-known/security.txt"
+
+root_txt="$(fetch "$root_url")"
+wk_txt="$(fetch "$wk_url")"
+
+if [[ -z "$root_txt" && -z "$wk_txt" ]]; then
+  root_url="https://www.${domain}/security.txt"
+  wk_url="https://www.${domain}/.well-known/security.txt"
+  root_txt="$(fetch "$root_url")"
+  wk_txt="$(fetch "$wk_url")"
+fi
+
+echo "$root_url:"
+if [[ -n "$root_txt" ]]; then
+  echo "$root_txt"
 else
-    echo "Invalid domain name"
-    exit 1
+  echo "(not found)"
 fi
 
-# Download the files and store the results in variables
-security_txt=$(curl -s https://$domain/security.txt)
-well_known_security_txt=$(curl -s https://$domain/.well-known/security.txt)
-
-#Check if both files are empty
-if [[ -z $security_txt && -z $well_known_security_txt ]]; then
-    domain="www.$domain"
-    security_txt=$(curl -s https://$domain/security.txt)
-    well_known_security_txt=$(curl -s https://$domain/.well-known/security.txt)
+echo
+echo "$wk_url:"
+if [[ -n "$wk_txt" ]]; then
+  echo "$wk_txt"
+else
+  echo "(not found)"
 fi
 
-# Print the results with the URL title above it
-echo "https://$domain/security.txt:"
-echo "$security_txt"
-echo ""
-echo "https://$domain/.well-known/security.txt:"
-echo "$well_known_security_txt"
+echo
+parse_fields() {
+  local txt="$1"
+  [[ -z "$txt" ]] && return 0
+  echo "$txt" | grep -E '^(Contact|Expires|Policy|Hiring|Acknowledgments|Preferred-Languages|Canonical|Encryption):' || true
+}
+
+echo "Parsed fields:"
+parse_fields "$root_txt"
+parse_fields "$wk_txt"

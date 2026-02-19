@@ -1,19 +1,16 @@
 #!/bin/bash
+set -euo pipefail
 
-# This script gets the HTTP headers of a website
+usage() {
+  echo "Usage: $0 <http(s)://url>"
+}
 
-# Check if the user provided a website URL
-if [ -z "$1" ]; then
-  echo "Error: Please provide a website URL"
+[[ $# -ge 1 ]] || { usage; exit 1; }
+url="$1"
+
+if [[ ! "$url" =~ ^https?:// ]]; then
+  echo "Error: URL must start with http:// or https://"
   exit 1
 fi
 
-# Store the website URL in a variable
-url=$1
-
-# Use the 'curl' command to get the HTTP headers
-# and store the output in a variable called 'headers'
-headers=$(curl -I $url)
-
-# Print the HTTP headers
-echo "$headers"
+curl -sS -I -L --max-time 15 "$url"

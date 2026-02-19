@@ -1,14 +1,23 @@
 #!/bin/bash
+set -euo pipefail
 
-# Usage: ./un-shorten.sh <short_url>
+usage() {
+  echo "Usage: $0 <https://short.url>"
+}
 
-url=$1
+[[ $# -ge 1 ]] || { usage; exit 1; }
+url="$1"
 
-if [[ ! $url =~ ^https ]]; then
-  echo -e "\033[1;31mError: URL must start with 'https'\033[0m"
+if [[ ! "$url" =~ ^https?:// ]]; then
+  echo "Error: URL must start with http:// or https://"
   exit 1
 fi
 
-long_url=$(curl -sI $url | grep -i location: | awk '{print $2}')
+final_url="$(curl -sS -L -o /dev/null -w '%{url_effective}' --max-time 15 "$url" || true)"
 
-echo -e "\033[1;32m$long_url\033[0m"
+if [[ -z "$final_url" ]]; then
+  echo "Error: Unable to resolve URL"
+  exit 1
+fi
+
+echo "$final_url"

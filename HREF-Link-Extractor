@@ -1,36 +1,29 @@
 #!/bin/bash
+set -euo pipefail
 
-url=$1
+usage() {
+  echo "Usage: $0 <http(s)://url>"
+}
 
-if [ -z "$url" ]; then
-    echo "Usage: $0 <URL>"
-    exit 1
-fi
+[[ $# -ge 1 ]] || { usage; exit 1; }
+base_url="$1"
+[[ "$base_url" =~ ^https?:// ]] || { echo "Error: URL must start with http:// or https://"; exit 1; }
 
-content=$(curl -Ls $url)
+content="$(curl -sS -L --max-time 20 "$base_url" || true)"
+[[ -n "$content" ]] || { echo "Unable to retrieve content from $base_url"; exit 1; }
 
-if [ -z "$content" ]; then
-    echo "Unable to retrieve content from $url"
-    exit 1
-fi
+mapfile -t links < <(printf '%s' "$content" | grep -Eoi 'href=["'"'"'][^"'"'"']+["'"'"']' | sed -E 's/^href=["'"'"'](.*)["'"'"']$/\1/' )
 
-links=$(echo "$content" | grep -oP '(?<=href=")[^"]*')
-
-declare -A seen_links
-for link in $links; do
-  if [[ "$link" == http* ]]; then
-    if [ -z "${seen_links[$link]}" ]; then
-      seen_links[$link]=1
-    fi
-  else
-    if [ -z "${seen_links[$url$link]}" ]; then
-      seen_links[$url$link]=1
-    fi
+declare -A seen
+for link in "${links[@]}"; do
+  [[ -z "$link" ]] && continue
+  if [[ "$link" =~ ^https?:// ]]; then
+    seen["$link"]=1
+  elif [[ "$link" =~ ^// ]]; then
+    seen["https:${link}"]=1
+  elif [[ "$link" =~ ^/ ]]; then
+    seen["${base_url%/}${link}"]=1
   fi
 done
 
-sorted_links=($(echo "${!seen_links[@]}" | tr ' ' '\n' | sort))
-
-for link in "${sorted_links[@]}"; do
-    echo "$link"
-done
+printf '%s\n' "${!seen[@]}" | sort
