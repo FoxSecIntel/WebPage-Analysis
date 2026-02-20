@@ -38,6 +38,8 @@ Quick examples:
 ./un-shorten.sh -f urls.txt --json
 ./get-headers.sh https://example.com
 ./get-securitytxt.sh example.com
+./get-securitytxt.sh --json example.com
+./get-securitytxt.sh --strict example.com
 ./webpage-parse.sh https://example.com
 ./HREF-Link-Extractor.sh https://example.com
 ./HREF-Link-Extractor.sh --domain-only https://example.com
