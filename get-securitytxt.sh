@@ -81,12 +81,26 @@ source_url=""
 content=""
 ctype=""
 
-if [[ -n "$wk_txt" ]]; then
+is_candidate_valid() {
+  local txt="$1"
+  local content_type="$2"
+  local pf
+  pf="$(parse_fields "$txt")"
+
+  # Consider valid only if at least one security.txt field is present.
+  # If content-type is provided, prefer text/plain but do not hard-fail solely on it.
+  if [[ -z "$pf" ]]; then
+    return 1
+  fi
+  return 0
+}
+
+if is_candidate_valid "$wk_txt" "$wk_ctype"; then
   source_status="FOUND_WELL_KNOWN"
   source_url="$wk_url"
   content="$wk_txt"
   ctype="$wk_ctype"
-elif [[ -n "$root_txt" ]]; then
+elif is_candidate_valid "$root_txt" "$root_ctype"; then
   source_status="FOUND_ROOT"
   source_url="$root_url"
   content="$root_txt"
@@ -103,12 +117,12 @@ else
   wk_txt="${wk_pack%__CTYPE__:*}"
   wk_ctype="${wk_pack##*__CTYPE__:}"
 
-  if [[ -n "$wk_txt" ]]; then
+  if is_candidate_valid "$wk_txt" "$wk_ctype"; then
     source_status="FOUND_WWW_FALLBACK_WELL_KNOWN"
     source_url="$wk_url"
     content="$wk_txt"
     ctype="$wk_ctype"
-  elif [[ -n "$root_txt" ]]; then
+  elif is_candidate_valid "$root_txt" "$root_ctype"; then
     source_status="FOUND_WWW_FALLBACK_ROOT"
     source_url="$root_url"
     content="$root_txt"
