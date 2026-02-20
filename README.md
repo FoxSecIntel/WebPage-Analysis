@@ -22,7 +22,7 @@ Quick examples:
 
 ## Other Tools
 
-- `un-shorten.sh` — resolve redirects and reveal final URL
+- `un-shorten.sh` — resolve redirects, chain, final domain/IP, and JSON/batch output
 - `get-headers.sh` — fetch HTTP response headers
 - `get-securitytxt.sh` — fetch and parse `security.txt`
 - `webpage-parse.sh` — extract links/emails from webpage HTML
@@ -33,6 +33,9 @@ Quick examples:
 
 ```bash
 ./un-shorten.sh https://bit.ly/example
+./un-shorten.sh --chain https://bit.ly/example
+./un-shorten.sh --json https://bit.ly/example
+./un-shorten.sh -f urls.txt --json
 ./get-headers.sh https://example.com
 ./get-securitytxt.sh example.com
 ./webpage-parse.sh https://example.com
