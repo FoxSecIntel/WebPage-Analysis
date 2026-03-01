@@ -1,6 +1,26 @@
+![Status](https://img.shields.io/badge/status-maintained-brightgreen)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+
 # WebPage-Analysis
 
-A practical Bash toolkit for quick webpage/URL triage in OSINT and defensive investigations.
+A webpage and URL triage toolkit for defensive analysis and investigation workflows.
+
+## Why this project
+
+- **Impact:** Speeds up URL and page triage for suspicious web artefacts.
+- **Scale:** Supports lightweight CLI use and structured output for automation.
+- **Use case:** Redirect analysis, header checks, link extraction, and surface-level web investigation.
+
+## Demo media
+
+- Screenshot: ![WebPage-Analysis terminal screenshot](docs/media/terminal-screenshot.png)
+- Demo GIF: ![WebPage-Analysis demo](docs/media/demo.gif)
+
+## Capability snapshot
+
+- Redirect chain resolution and URL unshortening
+- Header, security.txt, and status-code inspection
+- Link extraction workflows with JSON output options
 
 ## ⭐ Featured Tool: HREF-Link-Extractor.sh
 
