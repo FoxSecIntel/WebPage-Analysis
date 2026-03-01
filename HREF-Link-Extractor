@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+
+usage() {
+  echo "Usage: $0 <http(s)://url>"
+}
+
+[[ $# -ge 1 ]] || { usage; exit 1; }
+base_url="$1"
+[[ "$base_url" =~ ^https?:// ]] || { echo "Error: URL must start with http:// or https://"; exit 1; }
+
+content="$(curl -sS -L --max-time 20 "$base_url" || true)"
+[[ -n "$content" ]] || { echo "Unable to retrieve content from $base_url"; exit 1; }
+
+mapfile -t links < <(printf '%s' "$content" | grep -Eoi 'href=["'"'"'][^"'"'"']+["'"'"']' | sed -E 's/^href=["'"'"'](.*)["'"'"']$/\1/' )
+
+declare -A seen
+for link in "${links[@]}"; do
+  [[ -z "$link" ]] && continue
+  if [[ "$link" =~ ^https?:// ]]; then
+    seen["$link"]=1
+  elif [[ "$link" =~ ^// ]]; then
+    seen["https:${link}"]=1
+  elif [[ "$link" =~ ^/ ]]; then
+    seen["${base_url%/}${link}"]=1
+  fi
+done
+
+printf '%s\n' "${!seen[@]}" | sort
