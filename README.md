@@ -53,3 +53,12 @@ Quick examples:
 - Scripts are read-only and intended for authorized defensive/OSINT use.
 - Network timeouts and temporary web errors are handled where possible.
 - For reproducible output in pipelines, prefer `--no-color` where supported.
+
+## Quick Demo
+
+```bash
+# 1) Run a core check
+# 2) Request JSON output
+# 3) Pipe into jq for analyst workflows
+```
+
