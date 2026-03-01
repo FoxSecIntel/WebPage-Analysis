@@ -22,7 +22,7 @@ A webpage and URL triage toolkit for defensive analysis and investigation workfl
 - Header, security.txt, and status-code inspection
 - Link extraction workflows with JSON output options
 
-## ⭐ Featured Tool: HREF-Link-Extractor.sh
+## Featured Tool: HREF-Link-Extractor.sh
 
 `HREF-Link-Extractor.sh` is the strongest script in this repo for fast link triage.
 
